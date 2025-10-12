@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  homeLat   Float?
+  homeLng   Float?
+  timeZone  String?
+  interests Interest[]
+  bucket    BucketItem[]
+  avail     Availability[]
+  members   GroupMember[]
+  messages  Message[]
+}
+
+model Interest {
+  id     String @id @default(cuid())
+  tag    String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model BucketItem {
+  id     String @id @default(cuid())
+  item   String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model Availability {
+  id                 String @id @default(cuid())
+  weeklyTemplateJson String // JSON string with windows by weekday
+  user               User   @relation(fields: [userId], references: [id])
+  userId             String
+}
+
+model Group {
+  id      String        @id @default(cuid())
+  name    String
+  members GroupMember[]
+  msgs    Message[]
+  prefs   AIPrefs?
+  suggs   Suggestion[]
+}
+
+model GroupMember {
+  group    Group  @relation(fields: [groupId], references: [id])
+  groupId  String
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String
+  role     String // "leader" | "member"
+  @@id([groupId, userId])
+}
+
+model Message {
+  id        String @id @default(cuid())
+  group     Group  @relation(fields: [groupId], references: [id])
+  groupId   String
+  user      User   @relation(fields: [userId], references: [id])
+  userId    String
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model AIPrefs {
+  id                    String @id @default(cuid())
+  group      Group      @relation(fields: [groupId], references: [id])
+  groupId    String     @unique
+  readChatOn            Boolean @default(false)
+  planFromProfilesOn    Boolean @default(false)
+  readChatWindowDays    Int     @default(14)
+  planFromProfilesFreq  PlanFreq @default(WEEKLY)
+  notifyChannel         NotifyChannel @default(CHAT)
+}
+
+enum PlanFreq {
+  DAILY
+  WEEKLY
+  EVERY_3_DAYS
+}
+
+enum NotifyChannel {
+  PUSH
+  CHAT
+  BOTH
+}
+
+model Suggestion {
+  id        String @id @default(cuid())
+  group     Group  @relation(fields: [groupId], references: [id])
+  groupId   String
+  title     String
+  startISO  String
+  endISO    String
+  venueName String
+  venueLat  Float
+  venueLng  Float
+  source    Source
+  status    Status
+  detailsJson String?
+}
+
+enum Source {
+  CHAT
+  PROFILES
+}
+
+enum Status {
+  PROPOSED
+  ACCEPTED
+  DECLINED
+  DISMISSED
+  RESCHEDULE_REQUESTED
+}

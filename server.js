@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import OpenAI from 'openai';
+import { router as apiRouter } from './src/routes/index.js';
 
 const app = express();
 app.use(cors());
@@ -33,6 +34,9 @@ app.post('/api/chat', async (req, res) => {
     res.status(500).json({ error: 'OpenAI request failed' });
   }
 });
+
+// Mount new AI-meetup API
+app.use('/api', apiRouter);
 
 const port = process.env.PORT || 5175;
 app.listen(port, () => console.log(`Nexum server listening on :${port}`));
