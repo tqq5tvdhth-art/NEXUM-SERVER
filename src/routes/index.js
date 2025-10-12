@@ -78,8 +78,8 @@ router.post('/groups/:groupId/suggest', async (req, res) => {
     const prefs = await prisma.aIPrefs.findUnique({ where: { groupId: target.id } });
     const mode = String(req.body?.mode || 'profiles').toUpperCase();
 
-    if (mode === 'CHAT' && !prefs?.readChatOn)           return res.status(400).json({ error: 'chat scan is off' });
-    if (mode === 'PROFILES' && !prefs?.planFromProfilesOn) return res.status(400).json({ error: 'profiles planning is off' });
+    if (mode === 'CHAT' && !prefs?.readChatOn)              return res.status(400).json({ error: 'chat scan is off' });
+    if (mode === 'PROFILES' && !prefs?.planFromProfilesOn)  return res.status(400).json({ error: 'profiles planning is off' });
 
     const members = await prisma.groupMember.findMany({
       where: { groupId: target.id },
